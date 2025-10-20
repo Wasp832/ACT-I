@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I'm Sorry</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(135deg, #faf6f1 0%, #f5ebe0 100%);
+      overflow-x: hidden;
+      min-height: 100vh;
+      color: #4a4a4a;
+      opacity: 0;
+      animation: bgFadeIn 2s ease forwards;
+    }
+
+    @keyframes bgFadeIn {
+      to { opacity: 1; }
+    }
+
+    /* Intro Section */
+    .intro-container {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #faf6f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 1;
+      transition: opacity 1.2s ease;
+    }
+
+    .intro-container.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-video {
+      max-width: 100%;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Main Content */
+    .main-content {
+      opacity: 0;
+      transition: opacity 1.5s ease;
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-content.show {
+      opacity: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .header h1 {
+      font-size: clamp(24px, 5vw, 42px);
+      font-weight: 300;
+      color: #8b6f5c;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: clamp(14px, 2.5vw, 16px);
+      color: #a89080;
+      font-weight: 300;
+    }
+
+    /* Carousel Container */
+    .carousel-wrapper {
+      width: 100%;
+      max-width: 900px;
+      position: relative;
+      padding: 60px 0;
+    }
+
+    .carousel-container {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 20px 10px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .carousel-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Cards */
+    .card {
+      min-width: 280px;
+      max-width: 280px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 32px 24px;
+      box-shadow: 0 4px 20px rgba(139, 111, 92, 0.08);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      scroll-snap-align: center;
+      border: 1px solid rgba(139, 111, 92, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #d4a574, #c9956e);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(139, 111, 92, 0.15);
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(139, 111, 92, 0.2);
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card-number {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 11px;
+      color: #c9956e;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .card-message {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #5a5a5a;
+      font-weight: 300;
+      text-align: center;
+    }
+
+    /* Navigation Buttons */
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(139, 111, 92, 0.2);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-btn:hover {
+      background: white;
+      box-shadow: 0 6px 20px rgba(139, 111, 92, 0.15);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .nav-btn.prev {
+      left: -22px;
+    }
+
+    .nav-btn.next {
+      right: -22px;
+    }
+
+    .nav-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: #8b6f5c;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    /* Progress Indicator */
+    .progress-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 30px;
+    }
+
+    .progress-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(139, 111, 92, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .progress-dot.active {
+      width: 24px;
+      border-radius: 3px;
+      background: #c9956e;
+    }
+
+    /* Mobile Adjustments */
+    @media (max-width: 768px) {
+      .header {
+        margin-bottom: 30px;
+      }
+
+      .carousel-wrapper {
+        padding: 40px 0;
+      }
+
+      .card {
+        min-width: 260px;
+        max-width: 260px;
+        padding: 28px 20px;
+      }
+
+      .card-message {
+        font-size: 15px;
+      }
+
+      .nav-btn {
+        width: 38px;
+        height: 38px;
+      }
+
+      .nav-btn.prev {
+        left: -12px;
+      }
+
+      .nav-btn.next {
+        right: -12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 30px 15px;
+      }
+
+      .card {
+        min-width: calc(100vw - 80px);
+        max-width: calc(100vw - 80px);
+      }
+
+      .nav-btn {
+        display: none;
+      }
+    }
+
+    /* Utility */
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Intro Section -->
+  <div id="intro" class="intro-container">
+    <video id="introVideo" autoplay playsinline muted controls class="intro-video">
+      <source src="media/intro.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <!-- Background Music Playlist -->
+  <audio id="bgMusic"></audio>
+
+  <!-- Main Content -->
+  <div id="mainContent" class="main-content hidden">
+    <div class="header">
+      <h1>A Hundred Ways to Say I'm Sorry</h1>
+      <p>Each message carries my heart</p>
+    </div>
+
+    <div class="carousel-wrapper">
+      <button class="nav-btn prev" id="prevBtn" aria-label="Previous">
+        <svg viewBox="0 0 24 24">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <div class="carousel-container" id="carousel"></div>
+
+      <button class="nav-btn next" id="nextBtn" aria-label="Next">
+        <svg viewBox="0 0 24 24">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <div class="progress-container" id="progress"></div>
+  </div>
+
+  <script>
+    const messages = [
+      { id: 1, message: "I'm sorry for the silence, for not being there when you awoke😔." },
+      { id: 2, message: "Forgive me;for my head and my heart stumbled, when I didn't let you know. I left you in the dark." },
+      { id: 3, message: "I wish with all my heart that I could turn time back and undo kenye ilihappen." },
+      { id: 4, message: "I am honoured to awake each day my love with the same truth: I miss you as we slumber, and I am gladder when we awake." },
+      { id: 5, message: "You are still top priority in my life my love, even after nimemess up. I'm sorry😔" },
+      { id: 6, message: "My Love for you can never compare; right now it only kneels before you my love in apology." },
+      { id: 7, message: "If the pain I feel could sing, it would whisper I'm sorry to you softly, again and again." },
+      { id: 8, message: "Every apology I write is just me trying to connect, and show you how much I love you my love😔." },
+      { id: 9, message: "My heart keeps tracing the outline of your forgiveness." },
+      { id: 10, message: "I'll wait in the quiet until your smile finds me once more." },
+      { id: 11, message: "I'm sorry for every second that made you doubt my warmth." },
+      { id: 12, message: "Even when I fall short, my love for you stands tall." },
+      { id: 13, message: "You didn't deserve my delay; you deserved my presence." },
+      { id: 14, message: "Each apology is a prayer for another chance to make you smile." },
+      { id: 15, message: "I'm sorry for being the reason your heart hesitated." },
+      { id: 16, message: "I miss the simplicity of our laughter before the weight of my mistake." },
+      { id: 17, message: "Forgive me for letting silence say what love should have shouted." },
+      { id: 18, message: "You were patient; I was careless. I see that now." },
+      { id: 19, message: "Every beat of regret is just love learning humility." },
+      { id: 20, message: "If time were kind, it would let me rewrite yesterday in your arms." },
+      { id: 21, message: "I'm sorry I made you wait when all you needed was assurance." },
+      { id: 22, message: "Even in your absence, I kneel in your direction😔." },
+      { id: 23, message: "Forgive me for the pauses where comfort should have lived." },
+      { id: 24, message: "If I could draw my remorse, it would look like rain begging for sun🥺." },
+      { id: 25, message: "You are the calm I should never have risked losing." },
+      { id: 26, message: "Every sorry I say is just love wearing honesty." },
+      { id: 27, message: "I wish I'd chosen your peace over my distraction sooner." },
+      { id: 28, message: "Even regret sounds beautiful when it carries your name." },
+      { id: 29, message: "Forgive me, for love shouldn't have to ask twice." },
+      { id: 30, message: "If healing had a shape, it would be your hand with mine again😔." },
+      { id: 31, message: "My words failed where my feelings never did." },
+      { id: 32, message: "I'm sorry for turning moments into memories of longing." },
+      { id: 33, message: "This morning reminds me that I could have been more transparent, and aware😔." },
+      { id: 34, message: "I carry your patience like a mirror of what I should be." },
+      { id: 35, message: "You deserved better timing and softer words, from me, and I'm sorry I could not provide that for you😔'." },
+      { id: 36, message: "Forgive me for the distance I built without noticing." },
+      { id: 37, message: "Every breath since has been an echo of your name." },
+      { id: 38, message: "You were light; I was careless with it." },
+      { id: 39, message: "I'm sorry for not realizing sooner how much my silence hurt you🥺." },
+      { id: 40, message: "My love doesn't vanish; it just waits to be forgiven🥺🥺." },
+      { id: 41, message: "I want to earn your calm again, slowly and sincerely." },
+      { id: 42, message: "I'm sorry for being the reason your night felt heavy." },
+      { id: 43, message: "Every apology is my way of coming home to you." },
+      { id: 44, message: "You still make the world feel like poetry, even in guilt." },
+      { id: 45, message: "I wish my sorrys could reach you wrapped in warmth." },
+      { id: 46, message: "I'm sorry for not saying what my heart was screaming." },
+      { id: 47, message: "Forgive me for letting you feel alone when you never were." },
+      { id: 48, message: "I would trade my comfort for your peace any day." },
+      { id: 49, message: "Even my silence misses you my love😔." },
+      { id: 50, message: "I'm sorry for forgetting how precious your patience is." },
+      { id: 51, message: "You are the story my mistakes still bow to." },
+      { id: 52, message: "Forgive me, my love — I'm still learning to deserve you." },
+      { id: 53, message: "Every sorry is a seed; I hope it blooms into trust again." },
+      { id: 54, message: "If I could hug you through this message, I would 🥺." },
+      { id: 55, message: "I'm sorry for every pause that sounded like indifference." },
+      { id: 56, message: "You're still my soft place to land, even after the fall." },
+      { id: 57, message: "Forgive the mess of my emotions; they all point to you." },
+      { id: 58, message: "I miss the rhythm we had before my silence came." },
+      { id: 59, message: "I'm sorry I let exhaustion speak louder than affection." },
+      { id: 60, message: "You never stopped being here for me; I just lost the map." },
+      { id: 61, message: "Even guilt feels poetic when it carries your name😭." },
+      { id: 62, message: "Forgive me for loving you imperfectly, for failing to give you what you deserver out of me😔." },
+      { id: 63, message: "I'm sorry for the impatience that made your heart question mine." },
+      { id: 64, message: "You deserved tenderness, not my distraction." },
+      { id: 65, message: "Every sorry carries a piece of me trying to be better always😔." },
+      { id: 66, message: "Forgive me for the wait; I was finding the right way to mean it." },
+      { id: 67, message: "You are still the most beautiful reason to be sorry for anything😔." },
+      { id: 68, message: "I wish I could wrap this apology in your favorite warmth." },
+      { id: 69, message: "Even regret feels softer when I think of your laughter🥺." },
+      { id: 70, message: "Forgive me for the delay my love😔." },
+      { id: 71, message: "I'm sorry for every missed heartbeat between us." },
+      { id: 72, message: "You were light — and I blinked too long." },
+      { id: 73, message: "Every sorry I write is my way of kneeling before you my love again, asking for your mercy once more🥺." },
+      { id: 74, message: "Forgive me for mistaking your quiet for peace." },
+      { id: 75, message: "You still make my apologies sound like poetry." },
+      { id: 76, message: "I'm sorry for every moment that dimmed your brightness." },
+      { id: 77, message: "Love doesn't fade — it waits in apology." },
+      { id: 78, message: "Forgive me, for even in my dreams, I miss you, for my regret inaninyima sleep, and I can imagine it's so much worse for you🥺." },
+      { id: 79, message: "I'm sorry for not showing how much I care, soon enough. Please forgive me🥺." },
+      { id: 80, message: "You are still my favorite silence. And my peace. You are my everything🥺." },
+      { id: 81, message: "Every sorry I send is a heartbeat closer to grace, I hope it gives you peace. I'm sorry😔." },
+      { id: 82, message: "Forgive the clumsy way I love you — it's still real, and I'm sorry it gets repetitive sometimes😔." },
+      { id: 83, message: "I wish words could hold your hand the way I can't right now, and look into your eyes with all the love I have, and tell you how much I care😔." },
+      { id: 84, message: "I'm sorry for the weight my stupidity has carried, and that you had to bear it because of me😔." },
+      { id: 85, message: "Even distance can't communicate how much I mean my apology my love😔." },
+      { id: 86, message: "Forgive me my love — ForI'm learning to be the warmth I once took for granted from you😔." },
+      { id: 87, message: "You're the chapter my heart keeps rereading with softer eyes. The one that makes me cry, and laugh, all at once." },
+      { id: 88, message: "I'm sorry for every hesitation that made you doubt whether I loved you. I do. Always. I hope I can show you that😔." },
+      { id: 89, message: "Even regret feels sacred when it's tied to you. I'm sorry for leaving you my love😔." },
+      { id: 90, message: "Forgive me for every minute of this damned night that made you feel unseen, and that I ." },
+      { id: 91, message: "I'm sorry for forgetting and for erring and causing you lack of sleep😔." },
+      { id: 92, message: "You're still the calm I chase after every storm(that I unfortunately create😔)." },
+      { id: 93, message: "Every apology I write is another way to say I love you😔." },
+      { id: 94, message: "Forgive me for being lax and dumb in the wrong moment my love😔." },
+      { id: 95, message: "I'm sorry for not matching your consistency with my own, for not showing up when I was supposed to😔😔." },
+      { id: 96, message: "You deserve peace, and I'll wait until my sorry earns it my love." },
+      { id: 97, message: "I'm sorry for my cringy ass apologies. You deserve better. I hope I can be that for you😔" },
+      { id: 98, message: "Forgive me, my baby — my heart never left yours." },
+      { id: 99, message: "I'm sorry, and I mean it with everything I have." },
+      { id: 100, message: "You are my everything. I'm sorry for not being there for you. I love you my love😔." }
+    ];
+
+    const introVideo = document.getElementById('introVideo');
+    const bgMusic = document.getElementById('bgMusic');
+    const intro = document.getElementById('intro');
+    const mainContent = document.getElementById('mainContent');
+    const carousel = document.getElementById('carousel');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progress = document.getElementById('progress');
+
+    let currentIndex = 0;
+    let autoScrollInterval = null;
+    let isUserScrolling = false;
+    let scrollTimeout = null;
+    let hasVideoEnded = false;
+
+    // Music Playlist - Add your song paths here
+    const playlist = [
+      'media/bg-music.mp3',
+      'media/bg-music-2.mp3',
+      'media/bg-music-3.mp3',
+      // Add more songs as needed
+    ];
+    let currentSongIndex = 0;
+
+    // Allow sound on user interaction
+    window.addEventListener('click', () => {
+      introVideo.muted = false;
+      introVideo.play();
+    }, { once: true });
+
+    // After video ends
+    introVideo.addEventListener('ended', () => {
+      hasVideoEnded = true;
+      intro.classList.add('fade-out');
+      setTimeout(() => {
+        intro.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+        setTimeout(() => {
+          mainContent.classList.add('show');
+          playNextSong();
+          startAutoScroll();
+        }, 50);
+      }, 1200);
+    });
+
+    function playNextSong() {
+      if (currentSongIndex >= playlist.length) {
+        currentSongIndex = 0; // Loop playlist
+      }
+      
+      bgMusic.src = playlist[currentSongIndex];
+      bgMusic.volume = 0;
+      bgMusic.play().catch(err => console.log('Music play failed:', err));
+      fadeInMusic();
+      
+      currentSongIndex++;
+    }
+
+    // When a song ends, play the next one
+    bgMusic.addEventListener('ended', () => {
+      if (hasVideoEnded) {
+        playNextSong();
+      }
+    });
+
+    function fadeInMusic() {
+      const fadeInterval = setInterval(() => {
+        if (bgMusic.volume < 0.3) {
+          bgMusic.volume = Math.min(bgMusic.volume + 0.05, 0.3);
+        } else {
+          clearInterval(fadeInterval);
+        }
+      }, 200);
+    }
+
+    // Load cards
+    messages.forEach((card, i) => {
+      const div = document.createElement('div');
+      div.classList.add('card');
+      div.innerHTML = `
+        <span class="card-number">${String(card.id).padStart(2, '0')}</span>
+        <div class="card-message">${card.message}</div>
+      `;
+      carousel.appendChild(div);
+    });
+
+    // Progress dots
+    const totalPages = Math.ceil(messages.length / 3);
+    for (let i = 0; i < totalPages; i++) {
+      const dot = document.createElement('div');
+      dot.classList.add('progress-dot');
+      if (i === 0) dot.classList.add('active');
+      progress.appendChild(dot);
+    }
+
+    // Navigation
+    function updateProgress() {
+      const scrollLeft = carousel.scrollLeft;
+      const cardWidth = carousel.querySelector('.card').offsetWidth + 20;
+      currentIndex = Math.round(scrollLeft / cardWidth / 3);
+      
+      document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    // Auto-scroll functionality
+    function startAutoScroll() {
+      autoScrollInterval = setInterval(() => {
+        if (!isUserScrolling) {
+          const cardWidth = carousel.querySelector('.card').offsetWidth + 20;
+          const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+          
+          if (carousel.scrollLeft >= maxScroll - 10) {
+            // Reset to beginning when reaching the end
+            carousel.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            carousel.scrollBy({ left: cardWidth, behavior: 'smooth' });
+          }
+        }
+      }, 1000); // Scroll every 1 second
+    }
+
+    function stopAutoScroll() {
+      if (autoScrollInterval) {
+        clearInterval(autoScrollInterval);
+        autoScrollInterval = null;
+      }
+    }
+
+    function pauseAutoScroll() {
+      isUserScrolling = true;
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      
+      // Resume auto-scroll after 5 seconds of no user interaction
+      scrollTimeout = setTimeout(() => {
+        isUserScrolling = false;
+      }, 5000);
+    }
+
+    // Pause auto-scroll on user interaction
+    carousel.addEventListener('scroll', () => {
+      updateProgress();
+      pauseAutoScroll();
+    });
+
+    carousel.addEventListener('touchstart', pauseAutoScroll);
+    carousel.addEventListener('mousedown', pauseAutoScroll);
+    carousel.addEventListener('wheel', pauseAutoScroll);
+
+    prevBtn.addEventListener('click', () => {
+      pauseAutoScroll();
+      const cardWidth = carousel.querySelector('.card').offsetWidth + 20;
+      carousel.scrollBy({ left: -cardWidth * 1.5, behavior: 'smooth' });
+    });
+
+    nextBtn.addEventListener('click', () => {
+      pauseAutoScroll();
+      const cardWidth = carousel.querySelector('.card').offsetWidth + 20;
+      carousel.scrollBy({ left: cardWidth * 1.5, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
